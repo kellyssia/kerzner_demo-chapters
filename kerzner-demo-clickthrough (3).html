@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kerzner · Data Cloud Demo Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surface-2: #fafbfd;
+    --surface-3: #f0f3f8;
+    --ink: #0a1230;
+    --ink-muted: #5b6478;
+    --ink-faint: #8993a8;
+    --rule: rgba(10, 18, 48, 0.08);
+    --rule-strong: rgba(10, 18, 48, 0.16);
+    --sf-blue: #006dcc;
+    --sf-blue-bright: #1589ee;
+    --sf-blue-deep: #02497c;
+    --sf-blue-bg: rgba(21, 137, 238, 0.08);
+    --gold: #b48a3c;
+    --gold-bg: rgba(180, 138, 60, 0.1);
+    --alert: #d83a3a;
+    --alert-bg: rgba(216, 58, 58, 0.08);
+    --success: #0d8f5c;
+    --warning: #c87d00;
+    --warning-bg: rgba(200, 125, 0, 0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--rule);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sf-blue) 0%, var(--sf-blue-bright) 100%);
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .step-counter {
+    position: fixed;
+    top: 14px;
+    right: 24px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 50;
+    background: var(--surface);
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--rule);
+  }
+
+  .slide {
+    height: 100vh;
+    padding: 56px 56px 96px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-inner {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .slide-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sf-blue);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide-eyebrow .num {
+    background: var(--sf-blue-bg);
+    color: var(--sf-blue);
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+  .slide-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .slide-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin-bottom: 24px;
+    max-width: 720px;
+    line-height: 1.5;
+  }
+
+  /* ============ SLIDE 1 — HOME / QR CODE ============ */
+  .slide-home {
+    background: linear-gradient(135deg, #fafbfd 0%, var(--bg) 100%);
+    text-align: center;
+    align-items: center;
+    padding: 40px;
+  }
+  .home-logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 24px;
+  }
+  .home-tagline {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 28px;
+  }
+  .qr-frame {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(10, 18, 48, 0.06);
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+  .qr-display {
+    width: 160px;
+    height: 160px;
+    background: white;
+    display: block;
+  }
+  .home-cta {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .home-sub {
+    font-size: 13px;
+    color: var(--ink-muted);
+    max-width: 540px;
+    line-height: 1.6;
+  }
+  .home-brands {
+    display: flex;
+    gap: 28px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+  }
+  .home-brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: var(--ink-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ============ SLIDE 2 — 360 PROFILE ============ */
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1.5fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 6px rgba(10, 18, 48, 0.04);
+  }
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sf-blue) 0%, var(--sf-blue-deep) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .profile-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .profile-id {
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .attrs {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 18px;
+    font-size: 13px;
+  }
+  .attrs dt {
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 9px;
+    align-self: center;
+    font-weight: 600;
+  }
+  .attrs dd { color: var(--ink); font-size: 12px; }
+  .attrs small {
+    font-size: 9px;
+    margin-left: 4px;
+    color: var(--ink-muted);
+  }
+  .badge {
+    display: inline-block;
+    background: var(--gold-bg);
+    color: var(--gold);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-blue { background: var(--sf-blue-bg); color: var(--sf-blue); }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .metric-tile {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(10, 18, 48, 0.03);
+  }
+  .metric-tile:hover {
+    border-color: var(--sf-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(10, 18, 48, 0.06);
+  }
+  .metric-tile-featured {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--gold-bg) 100%);
+    border-color: var(--gold);
+  }
+  .metric-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .metric-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .metric-value .currency {
+    font-size: 16px;
+    color: var(--gold);
+    vertical-align: top;
+    margin-right: 3px;
+    font-weight: 500;
+  }
+  .metric-context {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+  }
+
+  /* ============ SLIDE 3 — ROADMAP ============ */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .roadmap-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(10, 18, 48, 0.03);
+  }
+  .roadmap-card:hover {
+    border-color: var(--sf-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(10, 18, 48, 0.06);
+  }
+  .roadmap-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--sf-blue);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .roadmap-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .roadmap-desc {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .roadmap-tag {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sf-blue);
+    font-weight: 600;
+    padding: 2px 7px;
+    background: var(--sf-blue-bg);
+    border-radius: 100px;
+  }
+
+  /* ============ BRIDGE SLIDES ============ */
+  .bridge-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .bridge-visual {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 4px 14px rgba(10, 18, 48, 0.06);
+  }
+  .bridge-content h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.05;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .bridge-content p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .bridge-bullets {
+    list-style: none;
+    padding: 0;
+  }
+  .bridge-bullets li {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .bridge-bullets li::before {
+    content: "→";
+    color: var(--sf-blue);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .bridge-cta {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--sf-blue-bg);
+    border-left: 3px solid var(--sf-blue);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .bridge-cta strong { color: var(--sf-blue); }
+
+  .pipe-stages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pipe-stage {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--sf-blue);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: left;
+  }
+  .pipe-stage-1 { border-top-color: var(--ink-faint); }
+  .pipe-stage-2 { border-top-color: var(--sf-blue-bright); }
+  .pipe-num {
+    font-size: 9px;
+    color: var(--ink-faint);
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    margin-bottom: 3px;
+  }
+  .pipe-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+  .pipe-data {
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /* ============ LITMUS SLIDE — ABSTRACT VERSION ============ */
+  .litmus-status-card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--alert-bg) 100%);
+    border: 1px solid var(--alert);
+    border-left: 4px solid var(--alert);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-top: 16px;
+  }
+  .litmus-event-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .litmus-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--alert);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    flex-shrink: 0;
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(216, 58, 58, 0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(216, 58, 58, 0); }
+  }
+  .litmus-event-info { flex: 1; }
+  .litmus-event-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--alert);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .litmus-event-title {
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .litmus-event-meta {
+    font-size: 12px;
+    color: var(--ink-muted);
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+  }
+  .litmus-pipeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .litmus-step {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    transition: all 0.4s ease;
+  }
+  .litmus-step.complete {
+    border-color: var(--success);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(13, 143, 92, 0.06) 100%);
+  }
+  .litmus-step-check {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--success);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .litmus-step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    color: var(--ink-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .litmus-step-label {
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .litmus-step-time {
+    font-size: 10px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+  }
+  .litmus-result {
+    background: var(--success);
+    color: white;
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: center;
+  }
+  .litmus-result-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+    opacity: 0.9;
+  }
+  .litmus-result-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  /* ============ FINAL SLIDE — SEGMENT + ACTIVATE ============ */
+  .segment-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 32px;
+    align-items: center;
+    margin-top: 16px;
+  }
+  .segment-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(10, 18, 48, 0.04);
+  }
+  .segment-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .segment-count {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 600;
+    color: var(--sf-blue);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .segment-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .segment-criteria {
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .segment-criteria-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .segment-rule {
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    padding: 6px 0;
+    line-height: 1.5;
+  }
+  .segment-rule .op { color: var(--sf-blue); }
+  .segment-rule .val { color: var(--gold); font-weight: 600; }
+
+  .activation-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: 18px;
+    transition: all 0.2s ease;
+  }
+  .channel-card:hover {
+    border-color: var(--gold);
+    background: var(--surface-2);
+    transform: translateY(-2px);
+  }
+  .channel-name {
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .channel-action {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .channel-detail {
+    font-size: 11px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  .takeaway-strip {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+  }
+  .takeaway {
+    text-align: center;
+    max-width: 220px;
+  }
+  .takeaway-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--sf-blue);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .takeaway-text {
+    font-size: 11px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .takeaway-text strong { color: var(--ink); }
+
+  /* ============ INGESTION SUMMARY SLIDE ============ */
+  .ingestion-flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1.2fr auto 1fr;
+    gap: 20px;
+    align-items: stretch;
+    margin-top: 16px;
+  }
+  .ingest-column {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ingest-column-header {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ingest-source {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--surface-2);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--ink);
+    border-left: 2px solid var(--sf-blue);
+  }
+  .ingest-source-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+  }
+  .ingest-source-pending {
+    border-left-color: var(--ink-faint);
+    color: var(--ink-muted);
+  }
+  .ingest-source-pending .ingest-source-dot {
+    background: var(--ink-faint);
+  }
+  .ingest-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sf-blue);
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .ingest-center {
+    background: linear-gradient(135deg, var(--sf-blue) 0%, var(--sf-blue-deep) 100%);
+    color: white;
+    border: 1px solid var(--sf-blue-deep);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 18px;
+  }
+  .ingest-center-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .ingest-center-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .ingest-center-pattern {
+    font-size: 11px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 100px;
+    margin: 3px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .ingest-right {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--gold-bg) 100%);
+    border-color: var(--gold);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .ingest-profile-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+  .ingest-profile-id {
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+  .ingest-profile-stat {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .ingest-profile-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .ingestion-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+  .ingest-stat {
+    text-align: center;
+    padding: 10px;
+  }
+  .ingest-stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--sf-blue);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .ingest-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+
+  /* ============ NAVIGATION ============ */
+  .nav {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    background: var(--surface);
+    padding: 6px;
+    border-radius: 100px;
+    border: 1px solid var(--rule);
+    box-shadow: 0 4px 14px rgba(10, 18, 48, 0.1);
+  }
+  .nav-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ink-muted);
+  }
+  .nav-btn:hover {
+    background: var(--sf-blue-bg);
+    color: var(--sf-blue);
+  }
+  .nav-btn-primary {
+    background: var(--sf-blue);
+    color: white;
+  }
+  .nav-btn-primary:hover {
+    background: var(--sf-blue-deep);
+    color: white;
+  }
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .nav-btn:disabled:hover {
+    background: transparent;
+    color: var(--ink-muted);
+  }
+  .nav-dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 0 8px;
+  }
+  .nav-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--rule-strong);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .nav-dot.active {
+    background: var(--sf-blue);
+    width: 20px;
+    border-radius: 100px;
+  }
+
+  .speaker-notes {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    background: rgba(10, 18, 48, 0.95);
+    color: #e8ecf4;
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 12px;
+    line-height: 1.5;
+    z-index: 90;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+  .speaker-notes.visible { display: block; }
+  .speaker-notes-eyebrow {
+    font-size: 8px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .speaker-notes strong { color: white; }
+
+  .keyboard-hint {
+    position: fixed;
+    bottom: 16px;
+    right: 24px;
+    font-size: 10px;
+    color: var(--ink-faint);
+    z-index: 80;
+  }
+  .key {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 9px;
+    margin: 0 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 11%"></div></div>
+<div class="step-counter" id="step-counter">Step 1 of 9</div>
+
+<!-- ============ SLIDE 1 — HOME / QR CODE ============ -->
+<div class="slide slide-home active" data-slide="1">
+  <img src="assets/kerzner-logo.png" alt="Kerzner" class="home-logo" onerror="this.style.display='none'">
+  <div class="home-tagline">Customer Data Platform · Live Demo</div>
+
+  <div class="qr-frame">
+    <svg class="qr-display" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="white"/>
+      <g fill="black">
+        <rect x="10" y="10" width="50" height="50"/>
+        <rect x="20" y="20" width="30" height="30" fill="white"/>
+        <rect x="25" y="25" width="20" height="20"/>
+        <rect x="140" y="10" width="50" height="50"/>
+        <rect x="150" y="20" width="30" height="30" fill="white"/>
+        <rect x="155" y="25" width="20" height="20"/>
+        <rect x="10" y="140" width="50" height="50"/>
+        <rect x="20" y="150" width="30" height="30" fill="white"/>
+        <rect x="25" y="155" width="20" height="20"/>
+        <rect x="70" y="10" width="10" height="10"/>
+        <rect x="90" y="10" width="10" height="10"/>
+        <rect x="110" y="10" width="10" height="10"/>
+        <rect x="70" y="30" width="10" height="10"/>
+        <rect x="80" y="40" width="10" height="10"/>
+        <rect x="100" y="30" width="10" height="10"/>
+        <rect x="120" y="40" width="10" height="10"/>
+        <rect x="70" y="70" width="10" height="10"/>
+        <rect x="90" y="70" width="10" height="10"/>
+        <rect x="110" y="70" width="10" height="10"/>
+        <rect x="130" y="70" width="10" height="10"/>
+        <rect x="150" y="70" width="10" height="10"/>
+        <rect x="170" y="70" width="10" height="10"/>
+        <rect x="10" y="70" width="10" height="10"/>
+        <rect x="30" y="70" width="10" height="10"/>
+        <rect x="50" y="70" width="10" height="10"/>
+        <rect x="20" y="80" width="10" height="10"/>
+        <rect x="40" y="80" width="10" height="10"/>
+        <rect x="60" y="80" width="10" height="10"/>
+        <rect x="80" y="80" width="10" height="10"/>
+        <rect x="100" y="90" width="10" height="10"/>
+        <rect x="120" y="90" width="10" height="10"/>
+        <rect x="140" y="90" width="10" height="10"/>
+        <rect x="160" y="90" width="10" height="10"/>
+        <rect x="180" y="90" width="10" height="10"/>
+        <rect x="70" y="100" width="10" height="10"/>
+        <rect x="90" y="100" width="10" height="10"/>
+        <rect x="130" y="100" width="10" height="10"/>
+        <rect x="150" y="100" width="10" height="10"/>
+        <rect x="80" y="110" width="10" height="10"/>
+        <rect x="100" y="110" width="10" height="10"/>
+        <rect x="120" y="110" width="10" height="10"/>
+        <rect x="140" y="110" width="10" height="10"/>
+        <rect x="170" y="110" width="10" height="10"/>
+        <rect x="70" y="130" width="10" height="10"/>
+        <rect x="90" y="130" width="10" height="10"/>
+        <rect x="110" y="130" width="10" height="10"/>
+        <rect x="130" y="130" width="10" height="10"/>
+        <rect x="150" y="130" width="10" height="10"/>
+        <rect x="170" y="130" width="10" height="10"/>
+        <rect x="70" y="150" width="10" height="10"/>
+        <rect x="80" y="170" width="10" height="10"/>
+        <rect x="100" y="150" width="10" height="10"/>
+        <rect x="100" y="170" width="10" height="10"/>
+        <rect x="120" y="150" width="10" height="10"/>
+        <rect x="140" y="170" width="10" height="10"/>
+        <rect x="160" y="150" width="10" height="10"/>
+        <rect x="180" y="170" width="10" height="10"/>
+        <rect x="80" y="160" width="10" height="10"/>
+        <rect x="120" y="160" width="10" height="10"/>
+        <rect x="140" y="160" width="10" height="10"/>
+        <rect x="160" y="170" width="10" height="10"/>
+        <rect x="180" y="150" width="10" height="10"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="home-cta">Welcome to Atlantis</div>
+  <div class="home-sub">
+    Scan a QR code at any Kerzner property — a guest enters our data universe.<br>
+    Multiply that by 4 million guests, 4 brands, and dozens of source systems.
+  </div>
+
+  <div class="home-brands">
+    <span class="home-brand-name">Atlantis</span>
+    <span class="home-brand-name">One&Only</span>
+    <span class="home-brand-name">Rare Finds</span>
+    <span class="home-brand-name">SIRO</span>
+  </div>
+
+  <div class="speaker-notes" data-notes="1">
+    <div class="speaker-notes-eyebrow">Speaker note · 90 seconds</div>
+    <strong>"Every scan, every booking across 4 brands and 4 million guests fires an event into our data platform. How do we make that data trustworthy, unified, and actionable in real time? That's what we're walking through today."</strong>
+  </div>
+</div>
+
+<!-- ============ SLIDE 2 — 360 PROFILE ============ -->
+<div class="slide" data-slide="2">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">01</span> The Destination</span>
+    <h1 class="slide-title">Where We're Going</h1>
+    <p class="slide-subtitle">Houssam Al Mansouri · 4 source records unified into a single trusted profile.</p>
+
+    <div class="profile-layout">
+      <div class="profile-card">
+        <div class="avatar">HA</div>
+        <h2 class="profile-name">Houssam<br>Al Mansouri</h2>
+        <div class="profile-id">UID · OPR-1001 · 4 records unified</div>
+        <dl class="attrs">
+          <dt>Email</dt>
+          <dd>houssam.almansouri@email.ae</dd>
+          <dt>Phone</dt>
+          <dd>+971 50 123 4567</dd>
+          <dt>Loyalty</dt>
+          <dd>LOY-AT-8821 · LOY-OO-4412</dd>
+          <dt>Persona</dt>
+          <dd><span class="badge badge-blue">Cross-brand Loyalist · VIP</span></dd>
+        </dl>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-tile metric-tile-featured">
+          <div class="metric-label">Lifetime Value</div>
+          <div class="metric-value"><span class="currency">AED</span>146,700</div>
+          <div class="metric-context">Across 4 unified stays</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">Stay Count</div>
+          <div class="metric-value">4</div>
+          <div class="metric-context">Atlantis × 2 · One&Only × 2</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">Total Nights</div>
+          <div class="metric-value">13</div>
+          <div class="metric-context">Jan – Sep 2025</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">Average Daily Rate</div>
+          <div class="metric-value"><span class="currency">AED</span>11,285</div>
+          <div class="metric-context">Across all stays</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="2">
+      <div class="speaker-notes-eyebrow">Speaker note · 2 minutes</div>
+      <strong>"Here's the destination — Houssam, a real guest. AED 146,700 lifetime value across 4 stays. Every metric computed live from his unified profile. This is what D360 builds on top of. Now let me show you how we get here."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 3 — ROADMAP ============ -->
+<div class="slide" data-slide="3">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">02</span> Demo Roadmap</span>
+    <h1 class="slide-title">What We'll Cover</h1>
+    <p class="slide-subtitle">Five architectural moments that answer the RFP's Litmus Test on page 21.</p>
+
+    <div class="roadmap-grid">
+      <div class="roadmap-card">
+        <div class="roadmap-num">01</div>
+        <div class="roadmap-title">Ingestion</div>
+        <div class="roadmap-desc">Streams, DLOs, Connectors. 300+ pre-built.</div>
+        <span class="roadmap-tag">Live</span>
+      </div>
+      <div class="roadmap-card">
+        <div class="roadmap-num">02</div>
+        <div class="roadmap-title">Cleansing</div>
+        <div class="roadmap-desc">Phone normalisation, Sentiment, BYOM.</div>
+        <span class="roadmap-tag">Live</span>
+      </div>
+      <div class="roadmap-card">
+        <div class="roadmap-num">03</div>
+        <div class="roadmap-title">Identity</div>
+        <div class="roadmap-desc">4 match rules · 21 → 12 unified individuals.</div>
+        <span class="roadmap-tag">Live</span>
+      </div>
+      <div class="roadmap-card">
+        <div class="roadmap-num">04</div>
+        <div class="roadmap-title">Insights</div>
+        <div class="roadmap-desc">CIs via SQL or Visual Builder.</div>
+        <span class="roadmap-tag">Live</span>
+      </div>
+      <div class="roadmap-card">
+        <div class="roadmap-num">05</div>
+        <div class="roadmap-title">Litmus & Activate</div>
+        <div class="roadmap-desc">Event in, segment shift, channels fire.</div>
+        <span class="roadmap-tag">RFP p.21</span>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="3">
+      <div class="speaker-notes-eyebrow">Speaker note · 60 seconds</div>
+      <strong>"We'll move through 5 architectural moments. Most live in Data Cloud. Ask questions throughout. The Litmus Test on RFP page 21 is the deal-decider — we'll run it live."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 4 — INGESTION SUMMARY (NEW) ============ -->
+<div class="slide" data-slide="4">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">03</span> Source to Platform</span>
+    <h1 class="slide-title">The Front Door</h1>
+    <p class="slide-subtitle">Where guest data enters Kerzner · Three ingestion patterns, one unified profile.</p>
+
+    <div class="ingestion-flow">
+      <div class="ingest-column">
+        <div class="ingest-column-header">Source Systems</div>
+        <div class="ingest-source">
+          <span class="ingest-source-dot"></span>
+          <span>Opera (PMS)</span>
+        </div>
+        <div class="ingest-source">
+          <span class="ingest-source-dot"></span>
+          <span>Marigold</span>
+        </div>
+        <div class="ingest-source">
+          <span class="ingest-source-dot"></span>
+          <span>Atlantis Circle</span>
+        </div>
+        <div class="ingest-source ingest-source-pending">
+          <span class="ingest-source-dot"></span>
+          <span>SevenRooms</span>
+        </div>
+        <div class="ingest-source ingest-source-pending">
+          <span class="ingest-source-dot"></span>
+          <span>Zenoti · Avaya</span>
+        </div>
+      </div>
+
+      <div class="ingest-arrow">→</div>
+
+      <div class="ingest-column ingest-center">
+        <div class="ingest-center-label">Data Cloud</div>
+        <div class="ingest-center-title">Harmonisation<br>Layer</div>
+        <div class="ingest-center-pattern">Streaming · sub-second</div>
+        <div class="ingest-center-pattern">Batch · scheduled</div>
+        <div class="ingest-center-pattern">Federated · zero-copy</div>
+      </div>
+
+      <div class="ingest-arrow">→</div>
+
+      <div class="ingest-column ingest-right">
+        <div class="ingest-profile-name">Unified<br>Individual</div>
+        <div class="ingest-profile-id">DMO · ssot__Id__c</div>
+        <div class="ingest-profile-stat">21 → 12</div>
+        <div class="ingest-profile-stat-label">Records to individuals</div>
+      </div>
+    </div>
+
+    <div class="ingestion-stats">
+      <div class="ingest-stat">
+        <div class="ingest-stat-num">3</div>
+        <div class="ingest-stat-label">Streams Live</div>
+      </div>
+      <div class="ingest-stat">
+        <div class="ingest-stat-num">300+</div>
+        <div class="ingest-stat-label">Connectors Available</div>
+      </div>
+      <div class="ingest-stat">
+        <div class="ingest-stat-num">0</div>
+        <div class="ingest-stat-label">Copy (Snowflake)</div>
+      </div>
+      <div class="ingest-stat">
+        <div class="ingest-stat-num">∞</div>
+        <div class="ingest-stat-label">Source Scale</div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="4">
+      <div class="speaker-notes-eyebrow">Speaker note · 90 seconds · pre-demo bridge</div>
+      <strong>"Before I jump into Data Cloud — quick architectural framing. Three ingestion patterns. Streaming for sub-second guest events. Batch for historical loads. Federated for your Snowflake data — zero copy, queries land where your data already lives. Three streams live today across Opera, Marigold, Atlantis Circle. SevenRooms, Zenoti, Avaya coming next. 300+ pre-built connectors. Now let me show you what this looks like live."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 5 — BRIDGE: BATCH TRANSFORMS ============ -->
+<div class="slide" data-slide="5">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">04</span> Bridge · Now Cleansing</span>
+    <div class="bridge-layout">
+      <div class="bridge-content">
+        <h2>Cleansing & Transforms</h2>
+        <p>Raw data lands unstructured and multi-format. Governed transforms standardise every value before identity resolution touches it.</p>
+        <ul class="bridge-bullets">
+          <li><strong>Phone normalisation</strong> — CASE-based SQL, 5 formats → E.164</li>
+          <li><strong>Quality flags</strong> — every record tagged for monitoring</li>
+          <li><strong>AI Functions</strong> — Sentiment, Topic Classification, BYOM</li>
+          <li><strong>Visual Builder or SQL</strong> — declarative or code</li>
+        </ul>
+        <div class="bridge-cta">
+          <strong>RFP page 16:</strong> validation, deduplication, standardisation, monitoring — one transform, four boxes ticked.
+        </div>
+      </div>
+      <div class="bridge-visual">
+        <div class="pipe-stages">
+          <div class="pipe-stage pipe-stage-1">
+            <div class="pipe-num">RAW INPUT</div>
+            <div class="pipe-name">Opera Source</div>
+            <div class="pipe-data">+971501234567<br>00971501234567<br>0501234567<br>501234567<br>N/A</div>
+          </div>
+          <div class="pipe-stage pipe-stage-2">
+            <div class="pipe-num">CLEANSED</div>
+            <div class="pipe-name">E.164 Output</div>
+            <div class="pipe-data">+971501234567<br>+971501234567<br>+971501234567<br>+971501234567<br>NULL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="5">
+      <div class="speaker-notes-eyebrow">Speaker note · transition</div>
+      <strong>"Now I'll jump back to Data Cloud and show you the phone normalisation transform. Visual Builder canvas, CASE SQL, before/after preview. Then AI Functions — Sentiment Analysis, Topic Classification — and BYOM for your own SageMaker models."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 6 — BRIDGE: IDENTITY RESOLUTION ============ -->
+<div class="slide" data-slide="6">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">05</span> Bridge · Now Identity</span>
+    <div class="bridge-layout">
+      <div class="bridge-content">
+        <h2>Identity Resolution</h2>
+        <p>Data is clean. Now the platform decides which records belong to the same person — and which don't.</p>
+        <ul class="bridge-bullets">
+          <li><strong>4 match rules</strong> — fuzzy name + email, fuzzy name + phone, exact email, exact phone</li>
+          <li><strong>Never name alone</strong> — Houssam and Hussam stay separate</li>
+          <li><strong>Reconciliation</strong> — per-field source authority</li>
+          <li><strong>Match clusters</strong> — auditable in Profile Explorer</li>
+        </ul>
+        <div class="bridge-cta">
+          <strong>Outcome:</strong> 21 source records → 12 unified individuals. Houssam unified across 4 records. Hussam held separate.
+        </div>
+      </div>
+      <div class="bridge-visual">
+        <div style="text-align: left;">
+          <div style="font-size: 10px; color: var(--ink-faint); letter-spacing: 0.15em; font-weight: 600; margin-bottom: 8px;">MATCH RULE EXAMPLE</div>
+          <div style="font-family: 'SF Mono', 'Roboto Mono', monospace; font-size: 11px; color: var(--ink); line-height: 1.7; background: var(--surface-2); padding: 14px; border-radius: 6px; border: 1px solid var(--rule);">
+            <span style="color: var(--success);">IF</span> fuzzy(name) <span style="color: var(--success);">AND</span> exact(email)<br>
+            &nbsp;&nbsp;<span style="color: var(--sf-blue);">THEN</span> merge_records()<br><br>
+            <span style="color: var(--success);">IF</span> fuzzy(name) <span style="color: var(--success);">AND</span> exact(phone)<br>
+            &nbsp;&nbsp;<span style="color: var(--sf-blue);">THEN</span> merge_records()<br><br>
+            <span style="color: var(--alert);">NEVER</span> match(name) alone
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="6">
+      <div class="speaker-notes-eyebrow">Speaker note · transition</div>
+      <strong>"In Data Cloud — 4 match rules, no name-only matching. Houssam Al Mansouri and Hussam Al Mansoori. Watch how the platform keeps them separate. Then Profile Explorer to show Houssam's 4 unified records."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 7 — BRIDGE: CALCULATED INSIGHTS ============ -->
+<div class="slide" data-slide="7">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">06</span> Bridge · Now Insights</span>
+    <div class="bridge-layout">
+      <div class="bridge-content">
+        <h2>Calculated Insights</h2>
+        <p>The unified profile becomes useful through metrics. Every KPI in your RFP page 21 — computed live.</p>
+        <ul class="bridge-bullets">
+          <li><strong>3 active CIs</strong> · 14 governed metrics</li>
+          <li><strong>SQL or Visual Builder</strong> — code or drag-drop</li>
+          <li><strong>Auditable</strong> — every metric traceable to source</li>
+          <li><strong>Schedule or on-demand</strong> — refresh per insight</li>
+        </ul>
+        <div class="bridge-cta">
+          <strong>For Houssam:</strong> LTV AED 146,700 · 4 stays · 13 nights · ADR 11,285 — computed live.
+        </div>
+      </div>
+      <div class="bridge-visual">
+        <div style="text-align: left;">
+          <div style="font-size: 10px; color: var(--ink-faint); letter-spacing: 0.15em; font-weight: 600; margin-bottom: 8px;">CALCULATED INSIGHT SQL</div>
+          <div style="font-family: 'SF Mono', 'Roboto Mono', monospace; font-size: 10px; color: var(--ink); line-height: 1.6; background: var(--surface-2); padding: 14px; border-radius: 6px; border: 1px solid var(--rule);">
+            <span style="color: var(--sf-blue);">SELECT</span><br>
+            &nbsp;&nbsp;guest_id__c,<br>
+            &nbsp;&nbsp;<span style="color: var(--sf-blue);">SUM</span>(spend) <span style="color: var(--success);">AS</span> lifetime_value,<br>
+            &nbsp;&nbsp;<span style="color: var(--sf-blue);">COUNT</span>(stay_id) <span style="color: var(--success);">AS</span> stays,<br>
+            &nbsp;&nbsp;<span style="color: var(--sf-blue);">SUM</span>(nights) <span style="color: var(--success);">AS</span> total_nights<br>
+            <span style="color: var(--sf-blue);">FROM</span> Stay_DMO__dlm<br>
+            <span style="color: var(--sf-blue);">GROUP BY</span> guest_id__c
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="7">
+      <div class="speaker-notes-eyebrow">Speaker note · transition</div>
+      <strong>"Let me show you Calculated Insights — SQL editor for code-first, Visual Builder for analysts. Same output, different authoring paths."</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8 — LITMUS (ABSTRACT) ============ -->
+<div class="slide" data-slide="8">
+  <div class="slide-inner">
+    <span class="slide-eyebrow" style="color: var(--alert);"><span class="num" style="background: var(--alert-bg); color: var(--alert);">07</span> RFP Page 21</span>
+    <h1 class="slide-title">Litmus Test</h1>
+    <p class="slide-subtitle">"Ingest event → update profile → recalc metrics → activate, in seconds, identity & consent enforced."</p>
+
+    <div class="litmus-status-card">
+      <div class="litmus-event-header">
+        <div class="litmus-icon">⚡</div>
+        <div class="litmus-event-info">
+          <div class="litmus-event-eyebrow">Real-time event detected</div>
+          <div class="litmus-event-title">Customer update received</div>
+          <div class="litmus-event-meta">Event ID GM-LITMUS-001 · Processing · Sub-minute end-to-end</div>
+        </div>
+      </div>
+
+      <div class="litmus-pipeline">
+        <div class="litmus-step complete">
+          <div class="litmus-step-check">✓</div>
+          <div class="litmus-step-label">Event<br>received</div>
+          <div class="litmus-step-time">+0s</div>
+        </div>
+        <div class="litmus-step complete">
+          <div class="litmus-step-check">✓</div>
+          <div class="litmus-step-label">Identity<br>matched</div>
+          <div class="litmus-step-time">+2s</div>
+        </div>
+        <div class="litmus-step complete">
+          <div class="litmus-step-check">✓</div>
+          <div class="litmus-step-label">Sentiment<br>computed</div>
+          <div class="litmus-step-time">+8s</div>
+        </div>
+        <div class="litmus-step complete">
+          <div class="litmus-step-check">✓</div>
+          <div class="litmus-step-label">Profile<br>updated</div>
+          <div class="litmus-step-time">+12s</div>
+        </div>
+        <div class="litmus-result">
+          <div class="litmus-result-label">PIPELINE</div>
+          <div class="litmus-result-value">Complete</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="8">
+      <div class="speaker-notes-eyebrow">Speaker note · the moment</div>
+      <strong>"This is the moment. RFP page 21 asks for ingest, update, recalc, activate in minutes/seconds with identity and consent. We just did it. Now let me show you what the agent sees on screen."</strong> Then switch to the live LWC on the Contact record.
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 9 — SEGMENT & ACTIVATE + CLOSE ============ -->
+<div class="slide" data-slide="9">
+  <div class="slide-inner">
+    <span class="slide-eyebrow"><span class="num">08</span> Activation & Close</span>
+    <h1 class="slide-title">Segment & Activate</h1>
+    <p class="slide-subtitle">Unified profile → segment → multi-channel orchestration. Identity-resolved, consent-enforced.</p>
+
+    <div class="segment-layout">
+      <div class="segment-card">
+        <div class="segment-name">High-Value VIP Cross-Brand · Engaged</div>
+        <div class="segment-count">847</div>
+        <div class="segment-label">Members in segment</div>
+        <div class="segment-criteria">
+          <div class="segment-criteria-label">SEGMENT RULES</div>
+          <div class="segment-rule">LTV <span class="op">&gt;</span> <span class="val">AED 100,000</span></div>
+          <div class="segment-rule">Stays <span class="op">≥</span> <span class="val">3</span></div>
+          <div class="segment-rule">Cross-brand <span class="op">=</span> <span class="val">true</span></div>
+          <div class="segment-rule">Last activity <span class="op">&lt;</span> <span class="val">30 days</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="activation-strip">
+          <div class="channel-card">
+            <div class="channel-name">Marketing Cloud</div>
+            <div class="channel-action">Re-engagement queued</div>
+            <div class="channel-detail">Personalised welcome touch · sent T-7 days before stay</div>
+          </div>
+          <div class="channel-card">
+            <div class="channel-name">Agentforce</div>
+            <div class="channel-action">Concierge briefed</div>
+            <div class="channel-detail">Full guest context with sentiment · proactive call</div>
+          </div>
+          <div class="channel-card">
+            <div class="channel-name">Paid Media</div>
+            <div class="channel-action">Lookalike pushed</div>
+            <div class="channel-detail">Meta & Google · identity-resolved attribution</div>
+          </div>
+        </div>
+
+        <div class="takeaway-strip">
+          <div class="takeaway">
+            <div class="takeaway-num">01</div>
+            <div class="takeaway-text"><strong>Litmus Test answered</strong><br>Ingest → activate, identity & consent enforced</div>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-num">02</div>
+            <div class="takeaway-text"><strong>Works with your stack</strong><br>Snowflake retained, MuleSoft retained, Data Cloud adds</div>
+          </div>
+          <div class="takeaway">
+            <div class="takeaway-num">03</div>
+            <div class="takeaway-text"><strong>AI-ready</strong><br>Vision 2029 runs on top of what we built today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes" data-notes="9">
+      <div class="speaker-notes-eyebrow">Speaker note · close · 3 min</div>
+      <strong>"Final piece — segment + activate. Switch to Data Cloud, show the segment, walk the activation targets. Then three takeaways: Litmus answered. Works with your stack. AI-ready foundation. End: 'Questions?'"</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NAVIGATION ============ -->
+<div class="nav">
+  <button class="nav-btn" id="prev-btn" onclick="prev()">← Back</button>
+  <div class="nav-dots" id="nav-dots"></div>
+  <button class="nav-btn nav-btn-primary" id="next-btn" onclick="next()">Next →</button>
+</div>
+
+<div class="keyboard-hint">
+  <span class="key">←</span> <span class="key">→</span> navigate · <span class="key">N</span> notes
+</div>
+
+<script>
+  const TOTAL_SLIDES = 9;
+  let currentSlide = 1;
+  let notesVisible = false;
+
+  function initDots() {
+    const dotsContainer = document.getElementById('nav-dots');
+    for (let i = 1; i <= TOTAL_SLIDES; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
+      dot.onclick = () => goto(i);
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function updateProgress() {
+    document.getElementById('progress-fill').style.width = (currentSlide / TOTAL_SLIDES * 100) + '%';
+    document.getElementById('step-counter').textContent = `Step ${currentSlide} of ${TOTAL_SLIDES}`;
+    document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i + 1 === currentSlide);
+    });
+    document.getElementById('prev-btn').disabled = (currentSlide === 1);
+    document.getElementById('next-btn').disabled = (currentSlide === TOTAL_SLIDES);
+  }
+
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`.slide[data-slide="${n}"]`);
+    if (target) target.classList.add('active');
+    currentSlide = n;
+    updateProgress();
+    updateNotesVisibility();
+  }
+
+  function next() {
+    if (currentSlide < TOTAL_SLIDES) showSlide(currentSlide + 1);
+  }
+  function prev() {
+    if (currentSlide > 1) showSlide(currentSlide - 1);
+  }
+  function goto(n) {
+    if (n >= 1 && n <= TOTAL_SLIDES) showSlide(n);
+  }
+
+  function toggleNotes() {
+    notesVisible = !notesVisible;
+    updateNotesVisibility();
+  }
+
+  function updateNotesVisibility() {
+    document.querySelectorAll('.speaker-notes').forEach(n => n.classList.remove('visible'));
+    if (notesVisible) {
+      const current = document.querySelector(`.slide[data-slide="${currentSlide}"] .speaker-notes`);
+      if (current) current.classList.add('visible');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    if (e.key.toLowerCase() === 'n') { e.preventDefault(); toggleNotes(); }
+  });
+
+  initDots();
+  updateProgress();
+</script>
+</body>
+</html>
